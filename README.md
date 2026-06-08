@@ -199,3 +199,8 @@ Open your browser at the URL shown by Vite (usually `http://localhost:5173`).
 ## License
 
 This repository does not currently specify an open source license.
+
+## Code of Conduct
+
+We are committed to fostering a welcoming and inclusive community.
+Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before contributing.
