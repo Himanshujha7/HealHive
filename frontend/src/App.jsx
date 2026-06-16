@@ -5,6 +5,7 @@ import HowItWorks from './Homepage/HowItWorks';
 import KeyFeatures from './Homepage/KeyFeatures';
 import Navbar from './Homepage/Navbar';
 import Specialties from './Homepage/Specialties';
+import BackToTop from './Homepage/BackToTop';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <KeyFeatures />
       <CTA />
       <Footer />
+      <BackToTop />
     </>
   );
 }
