@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext.jsx";
 import { filterDoctors } from "../utils/doctorFilterService.js";
@@ -80,6 +80,11 @@ const PatientForm = () => {
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Auto-scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
