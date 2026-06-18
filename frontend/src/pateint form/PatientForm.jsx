@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContext.jsx";
 import { filterDoctors } from "../utils/doctorFilterService.js";
@@ -80,6 +80,12 @@ const PatientForm = () => {
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (user?.email) {
+      setFormData((prev) => ({ ...prev, email: user.email }));
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -430,11 +436,13 @@ const PatientForm = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
+                        readOnly={!!user?.email}
+                        disabled={!!user?.email}
                         className={`w-full pl-11 pr-4 py-3 rounded-xl border ${
                           errors.email
                             ? "border-red-300 focus:ring-red-200"
                             : "border-emerald-200 focus:ring-emerald-200"
-                        } focus:ring-2 outline-none transition`}
+                        } focus:ring-2 outline-none transition disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed`}
                         placeholder="your@email.com"
                       />
                     </div>
