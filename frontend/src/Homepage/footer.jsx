@@ -8,9 +8,38 @@ import {
   ShieldCheck,
   HeartPulse,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext";
 
 export default function Footer() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleConsultNow = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    const token = await user.getIdToken();
+
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/users/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (data.role === "patient" && data.profileCompleted === false) {
+      navigate("/patient-form");
+    } else {
+      navigate("/available-doctors");
+    }
+  };
+
   return (
     <footer className="bg-slate-900 text-slate-300 pt-16 pb-8 px-6 lg:px-16">
       <div className="max-w-7xl mx-auto">
@@ -41,7 +70,11 @@ export default function Footer() {
               <li><Link to="/" className="hover:text-emerald-400">Home</Link></li>
               <li><Link to="/#how-it-works" className="hover:text-emerald-400">How It Works</Link></li>
               <li><Link to="/#specialties" className="hover:text-emerald-400">Specialties</Link></li>
-              <li><Link to="/patient-form" className="hover:text-emerald-400">Consult Now</Link></li>
+              <li>
+  <button onClick={handleConsultNow} className="hover:text-emerald-400">
+    Consult Now
+  </button>
+</li>
             </ul>
           </div>
 
