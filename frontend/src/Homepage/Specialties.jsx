@@ -22,7 +22,7 @@ const specialties = [
 
 const Specialties = () => {
   return (
-    <section className="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-24 overflow-hidden">
+    <section id="specialties" className="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-24 overflow-hidden">
       
       {/* Background glow */}
       <div className="absolute -top-32 left-1/4 h-96 w-96 bg-emerald-200/40 rounded-full blur-3xl animate-pulse" />

@@ -7,7 +7,7 @@ import { doctors } from "../utils/doctorFilterService";
 const navLinks = [
   { name: "Home", to: "/" },
   { name: "How It Works", to: "/#how-it-works" },
-  { name: "Specialties", to: "/specialties" },
+  { name: "Specialties", to: "/#specialties" },
 ];
 
 const Navbar = () => {
