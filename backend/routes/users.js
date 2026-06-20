@@ -58,7 +58,7 @@ router.post("/login", async (req, res) => {
     const token = authHeader.split(" ")[1];
     const decodedToken = await admin.auth.verifyIdToken(token);
 
-    const user = await User.findOne({ uid: decodedToken.uid });
+    const user = await User.findOne({ uid: decodedToken.uid }).lean();
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -67,7 +67,7 @@ router.post("/login", async (req, res) => {
     // If doctor, check doctor profile completion
     if (user.role === "doctor") {
       const Doctor = (await import("../models/Doctor.js")).default;
-      const doctor = await Doctor.findOne({ uid: decodedToken.uid });
+      const doctor = await Doctor.findOne({ uid: decodedToken.uid }).lean();
 
       return res.json({
         role: user.role,

@@ -43,10 +43,12 @@ const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [openEdit, setOpenEdit] = useState(false);
   const [editData, setEditData] = useState(null);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (authLoading) return;
+
     const fetchDoctorData = async () => {
       try {
         if (!user) {
@@ -55,6 +57,8 @@ const DoctorDashboard = () => {
           return;
         }
 
+        setLoading(true);
+        setError(null);
         const token = await user.getIdToken();
         const res = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/api/doctor/profile`,
@@ -95,7 +99,7 @@ const DoctorDashboard = () => {
     };
 
     fetchDoctorData();
-  }, [user]);
+  }, [user, authLoading]);
 
   if (loading) {
     return (

@@ -14,7 +14,7 @@ router.post("/submit", verifyToken, async (req, res) => {
     const uid = req.firebaseUser.uid; 
 
     // prevent duplicate doctor
-    const existingDoctor = await Doctor.findOne({ uid });
+    const existingDoctor = await Doctor.findOne({ uid }).lean();
     if (existingDoctor) {
       return res.status(400).json({
         message: "Doctor already registered",
@@ -68,7 +68,7 @@ router.get("/public", async (_req, res) => {
 router.post("/select/:doctorId", verifyToken, async (req, res) => {
   try {
     const uid = req.firebaseUser.uid;
-    const patient = await User.findOne({ uid });
+    const patient = await User.findOne({ uid }).lean();
     if (!patient || patient.role !== "patient") {
       return res.status(403).json({ message: "Only patients can select a doctor" });
     }
@@ -102,7 +102,7 @@ router.get("/profile", verifyToken, async (req, res) => {
     const uid = req.firebaseUser.uid;
     console.log("🔍 /api/doctor/profile called for uid:", uid);
 
-    const doctor = await Doctor.findOne({ uid });
+    const doctor = await Doctor.findOne({ uid }).lean();
 
     if (!doctor) {
       console.log("❌ Doctor profile not found for uid:", uid);

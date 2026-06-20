@@ -37,7 +37,7 @@ router.post("/submit", verifyFirebaseToken, async (req, res) => {
 router.get("/get", verifyFirebaseToken, async (req, res) => {
   try {
     const uid = req.user.uid;
-    const patient = await Patient.findOne({ uid });
+    const patient = await Patient.findOne({ uid }).lean();
 
     if (!patient) {
       return res.status(200).json({

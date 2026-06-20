@@ -87,7 +87,7 @@ const InfoRow = ({ label, value }) => (
 );
 
 const PatientDashboard = ({ patient = samplePatient }) => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [patientData, setPatientData] = useState(patient);
   const [loading, setLoading] = useState(true);
@@ -95,6 +95,8 @@ const PatientDashboard = ({ patient = samplePatient }) => {
 
   // ✅ Fetch patient data on mount
   useEffect(() => {
+    if (authLoading) return;
+
     const fetchPatientData = async () => {
       try {
         if (!user) {
@@ -103,6 +105,7 @@ const PatientDashboard = ({ patient = samplePatient }) => {
           return;
         }
 
+        setLoading(true);
         console.log("✅ User logged in:", user.email);
         const token = await user.getIdToken();
         const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -174,7 +177,7 @@ const PatientDashboard = ({ patient = samplePatient }) => {
     };
 
     fetchPatientData();
-  }, [user]);
+  }, [user, authLoading]);
 
   const handleEdit = () => {
     setIsEditing(true);

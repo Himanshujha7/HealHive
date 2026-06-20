@@ -187,7 +187,7 @@ router.get("/status/:consultationId", verifyFirebaseToken, async (req, res) => {
     const doctor = await Doctor.findOne({
       "interestedPatients.consultationId": consultationId,
       "interestedPatients.uid": req.user?.uid,
-    });
+    }).lean();
 
     if (!doctor) {
       return res.status(404).json({ active: false, message: "Consultation not found" });
