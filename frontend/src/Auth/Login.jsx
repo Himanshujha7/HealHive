@@ -12,7 +12,7 @@ function Input({ type = "text", placeholder, className = "", ...props }) {
     <input
       type={type}
       placeholder={placeholder}
-      className={`w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition ${className}`}
+      className={`w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition ${className}`}
       {...props}
     />
   );

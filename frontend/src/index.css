@@ -1,8 +1,27 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Smooth transition for theme colors */
+*, *::before, *::after {
+  transition-property: background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
 html {
   scroll-behavior: smooth;
 }
+
+body {
+  @apply bg-white text-slate-900 transition-colors duration-200;
+}
+
+body.dark,
+.dark body {
+  @apply bg-slate-950 text-slate-100;
+}
+
 
 @keyframes slideLeft {
   0% {
@@ -45,3 +64,125 @@ html {
 .animate-fadeInUp {
   animation: fadeInUp 0.3s ease-out forwards;
 }
+
+/* Global Dark Mode Overrides */
+.dark body {
+  background-color: #020617; /* slate-950 */
+  color: #f8fafc; /* slate-50 */
+}
+
+/* Background Gradients */
+.dark .bg-gradient-to-br.from-emerald-50,
+.dark .bg-gradient-to-br.from-teal-50,
+.dark .bg-gradient-to-br.from-emerald-50.via-white.to-teal-50,
+.dark .bg-gradient-to-br.from-teal-50.via-white.to-emerald-50 {
+  background-image: linear-gradient(to bottom right, #020617, #0f172a, #030712) !important;
+}
+
+/* Gray Container/Section Backgrounds */
+.dark .bg-gray-100,
+.dark .bg-slate-50,
+.dark .bg-gray-50,
+.dark .bg-slate-100 {
+  background-color: #0b0f19 !important; /* Slate-900/950 */
+}
+
+/* Cards & Modals */
+.dark .bg-white {
+  background-color: #1e293b !important; /* slate-800 */
+  color: #f8fafc !important;
+}
+
+/* Specific text color adjustments */
+.dark .text-slate-900,
+.dark .text-gray-900,
+.dark .text-slate-800,
+.dark .text-gray-800,
+.dark .text-slate-950 {
+  color: #f8fafc !important;
+}
+
+.dark .text-slate-700,
+.dark .text-gray-700,
+.dark .text-slate-600,
+.dark .text-gray-600 {
+  color: #cbd5e1 !important; /* slate-300 */
+}
+
+.dark .text-slate-500,
+.dark .text-gray-500 {
+  color: #94a3b8 !important; /* slate-400 */
+}
+
+/* Borders */
+.dark .border-emerald-100,
+.dark .border-gray-200,
+.dark .border-gray-300,
+.dark .border-slate-200 {
+  border-color: #334155 !important; /* slate-700 */
+}
+
+/* Focus and ring adjustments */
+.dark .focus-within\:ring-emerald-200:focus-within {
+  --tw-ring-color: #334155 !important;
+}
+
+/* Inputs, Selects, Textareas */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #0f172a !important; /* slate-900 */
+  color: #ffffff !important;
+  border-color: #334155 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Badges & Tags */
+.dark .bg-emerald-50 {
+  background-color: #064e3b !important;
+  color: #34d399 !important;
+}
+
+.dark .bg-emerald-100 {
+  background-color: #064e3b !important;
+  color: #34d399 !important;
+}
+
+.dark .text-emerald-700,
+.dark .text-emerald-600 {
+  color: #34d399 !important; /* emerald-400 */
+}
+
+.dark .bg-white.border-emerald-100 {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Dropdowns & Modals */
+.dark .bg-white.shadow-xl,
+.dark .bg-white.shadow-2xl {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Sidebar and Dashboard panels */
+.dark .bg-gradient-to-r.from-emerald-50.to-teal-50 {
+  background-image: linear-gradient(to right, #064e3b, #0f172a) !important;
+}
+.dark .from-emerald-100 {
+  --tw-gradient-from: #064e3b !important;
+}
+.dark .to-teal-200 {
+  --tw-gradient-to: #0f172a !important;
+}
+.dark .from-teal-100 {
+  --tw-gradient-from: #115e59 !important;
+}
+.dark .to-green-200 {
+  --tw-gradient-to: #0f172a !important;
+}
+

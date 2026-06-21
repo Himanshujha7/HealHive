@@ -15,7 +15,7 @@ function Input({ type = "text", placeholder, className = "", ...props }) {
     <input
       type={type}
       placeholder={placeholder}
-      className={`w-full px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition ${className}`}
+      className={`w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-750 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition ${className}`}
       {...props}
     />
   );
@@ -131,23 +131,23 @@ export default function CreateAccount() {
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Register As</label>
 
-              <div className="relative w-64 h-10 bg-gray-200 rounded-full flex items-center cursor-pointer select-none">
+              <div className="relative w-64 h-10 bg-gray-200 dark:bg-slate-800 rounded-full flex items-center cursor-pointer select-none">
                 {/* Sliding indicator */}
                 <div
-                  className={`absolute top-1 left-1 w-1/2 h-8 bg-emerald-50 border border-emerald-700 rounded-full shadow-md transition-transform duration-300 ${
+                  className={`absolute top-1 left-1 w-1/2 h-8 bg-emerald-50 dark:bg-slate-900 border border-emerald-700 dark:border-emerald-500 rounded-full shadow-md transition-transform duration-300 ${
                     role === "doctor" ? "translate-x-full" : "translate-x-0"
                   }`}
                 ></div>
 
                 {/* Labels */}
                 <div
-                  className="w-1/2 text-center z-10 font-semibold text-emerald-700 cursor-pointer"
+                  className="w-1/2 text-center z-10 font-semibold text-emerald-700 dark:text-emerald-400 cursor-pointer"
                   onClick={() => setRole("patient")}
                 >
                   Patient
                 </div>
                 <div
-                  className="w-1/2 text-center z-10 font-semibold text-emerald-700 cursor-pointer"
+                  className="w-1/2 text-center z-10 font-semibold text-emerald-700 dark:text-emerald-400 cursor-pointer"
                   onClick={() => setRole("doctor")}
                 >
                   Doctor

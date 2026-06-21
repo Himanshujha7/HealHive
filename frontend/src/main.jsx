@@ -9,6 +9,7 @@ import ForgotPassword from "./Auth/ForgotPassword.jsx";
 import CreateAccount from "./Auth/CreateAccount.jsx";
 import ResetPassword from "./Auth/ResetPassword.jsx";
 import { AuthProvider } from "./Context/AuthContext";
+import { ThemeProvider } from "./Context/ThemeContext";
 import ResetSuccess from "./ResetSuccess.jsx";
 import PatientForm from "./pateint form/PatientForm.jsx";
 // import AvailableDoctors from "./pateint form/AvailableDoctors.jsx";
@@ -38,30 +39,33 @@ const PageLoader = () => (
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AuthProvider>
-      <BrowserRouter>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/create-account" element={<CreateAccount />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/resetsuccess" element={<ResetSuccess />} />
-            <Route path="/patient-form" element={<PatientForm />} />
-            <Route path="/available-doctors" element={<DoctorsAvailable />} />
-            <Route path="/patient-dashboard" element={<PatientDashboard />} />
-            <Route path="/doc" element={<DoctorForm />} />
-            <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-            <Route path="/chat/:consultationId" element={<ChatPage />} />
-            <Route path="/doctor-search" element={<DoctorSearch />} />
-            <Route path="/doctor-profile/:doctorId" element={<DoctorProfile />} />
-            <Route path="/consultation-payment/:doctorId" element={<ConsultationPayment />} />
-            <Route path="/call-room/:consultationId" element={<CallRoom />} />
-            <Route path="/appointment-history" element={<AppointmentHistory />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<App />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/create-account" element={<CreateAccount />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/resetsuccess" element={<ResetSuccess />} />
+              <Route path="/patient-form" element={<PatientForm />} />
+              <Route path="/available-doctors" element={<DoctorsAvailable />} />
+              <Route path="/patient-dashboard" element={<PatientDashboard />} />
+              <Route path="/doc" element={<DoctorForm />} />
+              <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+              <Route path="/chat/:consultationId" element={<ChatPage />} />
+              <Route path="/doctor-search" element={<DoctorSearch />} />
+              <Route path="/doctor-profile/:doctorId" element={<DoctorProfile />} />
+              <Route path="/consultation-payment/:doctorId" element={<ConsultationPayment />} />
+              <Route path="/call-room/:consultationId" element={<CallRoom />} />
+              <Route path="/appointment-history" element={<AppointmentHistory />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   </StrictMode>
 );
+

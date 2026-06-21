@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { doctors } from "../utils/doctorFilterService";
+import { useTheme } from "../Context/ThemeContext";
+import { Sun, Moon, Monitor } from "lucide-react";
 
 const navLinks = [
   { name: "Home", to: "/" },
@@ -13,6 +15,8 @@ const navLinks = [
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null); // Track user role (patient/doctor)
   const [searchInput, setSearchInput] = useState("");
@@ -161,6 +165,7 @@ const Navbar = () => {
     const handler = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setShowAccount(false);
+        setShowThemeMenu(false);
         setOpen(false);
         setShowSuggestions(false);
         setActiveSuggestion(-1);
@@ -171,7 +176,7 @@ const Navbar = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-emerald-200">
+    <header className="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-emerald-200 dark:border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* LEFT */}
@@ -189,7 +194,7 @@ const Navbar = () => {
                   key={link.to}
                   to={link.to}
                   onClick={(e) => handleNavClick(e, link.to)}
-                  className="px-4 py-2 rounded-lg text-md font-medium text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 transition"
+                  className="px-4 py-2 rounded-lg text-md font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 transition"
                 >
                   {link.name}
                 </Link>
@@ -201,9 +206,9 @@ const Navbar = () => {
           <div className="flex items-center gap-3" ref={menuRef}>
             {/* 🔍 SEARCH BAR (restored) */}
             <div className="relative hidden lg:block">
-              <div className="flex items-center gap-2 bg-emerald-50/60 border border-emerald-100 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-emerald-200">
+              <div className="flex items-center gap-2 bg-emerald-50/60 dark:bg-slate-800 border border-emerald-100 dark:border-slate-700 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-emerald-200 dark:focus-within:ring-slate-700">
                 <svg
-                  className="h-4 w-4 text-emerald-400"
+                  className="h-4 w-4 text-emerald-400 dark:text-slate-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -216,7 +221,7 @@ const Navbar = () => {
                   />
                 </svg>
                 <input
-                  className="bg-transparent outline-none text-sm text-slate-700 placeholder-emerald-400 w-56"
+                  className="bg-transparent outline-none text-sm text-slate-700 dark:text-slate-200 placeholder-emerald-400 dark:placeholder-slate-500 w-56"
                   placeholder="Search doctors, specialties"
                   value={searchInput}
                   onChange={(e) => {
@@ -258,7 +263,7 @@ const Navbar = () => {
                 {searchInput && (
                   <button
                     onClick={() => handleSearchDoctors()}
-                    className="text-emerald-600 hover:text-emerald-700 transition ml-1"
+                    className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-350 transition ml-1"
                     title="Search"
                     type="button"
                   >
@@ -281,7 +286,7 @@ const Navbar = () => {
               {showSuggestions &&
                 searchInput.trim() &&
                 searchSuggestions.length > 0 && (
-                  <div className="absolute right-0 top-full mt-2 w-80 overflow-hidden rounded-xl border border-emerald-100 bg-white shadow-xl">
+                  <div className="absolute right-0 top-full mt-2 w-80 overflow-hidden rounded-xl border border-emerald-100 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
                     {searchSuggestions.map((suggestion, index) => (
                       <button
                         key={`${suggestion.type}-${suggestion.value}`}
@@ -293,19 +298,19 @@ const Navbar = () => {
                         onMouseEnter={() => setActiveSuggestion(index)}
                         className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition ${
                           activeSuggestion === index
-                            ? "bg-emerald-50"
-                            : "hover:bg-emerald-50"
+                            ? "bg-emerald-50 dark:bg-slate-700"
+                            : "hover:bg-emerald-50 dark:hover:bg-slate-750"
                         }`}
                       >
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-semibold text-slate-800">
+                          <span className="block truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
                             {suggestion.label}
                           </span>
-                          <span className="block truncate text-xs text-slate-500">
+                          <span className="block truncate text-xs text-slate-500 dark:text-slate-400">
                             {suggestion.meta}
                           </span>
                         </span>
-                        <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-1 text-[11px] font-semibold text-emerald-700">
+                        <span className="shrink-0 rounded-full bg-emerald-100 dark:bg-emerald-950 px-2 py-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-350">
                           {suggestion.type}
                         </span>
                       </button>
@@ -338,35 +343,89 @@ const Navbar = () => {
               </Link>
             )}
 
+            {/* Theme Toggle Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setShowThemeMenu((s) => !s);
+                  setShowAccount(false);
+                }}
+                className="p-2 rounded-xl border border-emerald-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-emerald-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition"
+                title="Toggle theme"
+              >
+                {theme === "light" && <Sun className="h-5 w-5 text-amber-500" />}
+                {theme === "dark" && <Moon className="h-5 w-5 text-indigo-400" />}
+                {theme === "system" && <Monitor className="h-5 w-5 text-slate-500" />}
+              </button>
+
+              {showThemeMenu && (
+                <div className="absolute right-0 mt-3 w-36 rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-emerald-100 dark:border-slate-700 overflow-hidden z-50">
+                  <button
+                    onClick={() => {
+                      toggleTheme("light");
+                      setShowThemeMenu(false);
+                    }}
+                    className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-700 ${theme === "light" ? "bg-emerald-50/50 dark:bg-slate-700/50 font-semibold" : ""}`}
+                  >
+                    <Sun className="h-4 w-4 text-amber-500" />
+                    Light
+                  </button>
+                  <button
+                    onClick={() => {
+                      toggleTheme("dark");
+                      setShowThemeMenu(false);
+                    }}
+                    className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-700 ${theme === "dark" ? "bg-emerald-50/50 dark:bg-slate-700/50 font-semibold" : ""}`}
+                  >
+                    <Moon className="h-4 w-4 text-indigo-400" />
+                    Dark
+                  </button>
+                  <button
+                    onClick={() => {
+                      toggleTheme("system");
+                      setShowThemeMenu(false);
+                    }}
+                    className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-700 ${theme === "system" ? "bg-emerald-50/50 dark:bg-slate-700/50 font-semibold" : ""}`}
+                  >
+                    <Monitor className="h-4 w-4 text-slate-500" />
+                    System
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* ACCOUNT */}
             <div className="relative">
               <button
-                onClick={() => setShowAccount((s) => !s)}
-                className="flex items-center gap-2 bg-white border border-emerald-100 rounded-full p-1 hover:shadow transition"
+                onClick={() => {
+                  setShowAccount((s) => !s);
+                  setShowThemeMenu(false);
+                }}
+                className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-emerald-100 dark:border-slate-700 rounded-full p-1 hover:shadow transition"
               >
                 <img
                   src={`https://ui-avatars.com/api/?name=${user?.displayName || "Account"}&background=059669&color=fff`}
                   alt="avatar"
                   className="h-8 w-8 rounded-full"
                 />
-                <span className="hidden sm:block text-sm font-medium text-slate-700">
+                <span className="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-300">
                   {user?.displayName || "Account"}
                 </span>
               </button>
 
               {showAccount && (
-                <div className="absolute right-0 mt-3 w-48 rounded-xl bg-white shadow-xl border border-emerald-100 overflow-hidden">
+                <div className="absolute right-0 mt-3 w-48 rounded-xl bg-white dark:bg-slate-800 shadow-xl border border-emerald-100 dark:border-slate-700 overflow-hidden">
                   {!user ? (
                     <>
                       <Link
                         to="/create-account"
-                        className="block px-4 py-2 text-sm hover:bg-emerald-50"
+                        className="block px-4 py-2 text-sm hover:bg-emerald-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
                       >
                         Create Account
                       </Link>
                       <Link
                         to="/login"
-                        className="block px-4 py-2 text-sm hover:bg-emerald-50"
+                        className="block px-4 py-2 text-sm hover:bg-emerald-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
                       >
                         Login
                       </Link>
@@ -379,7 +438,7 @@ const Navbar = () => {
                             ? "/doctor-dashboard"
                             : "/patient-dashboard"
                         }
-                        className="block px-4 py-2 text-sm hover:bg-emerald-50"
+                        className="block px-4 py-2 text-sm hover:bg-emerald-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
                       >
                         My Dashboard
                       </Link>
@@ -387,13 +446,13 @@ const Navbar = () => {
                         <>
                           <Link
                             to="/doctor-search"
-                            className="block px-4 py-2 text-sm hover:bg-emerald-50"
+                            className="block px-4 py-2 text-sm hover:bg-emerald-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
                           >
                             Find a Doctor
                           </Link>
                           <Link
                             to="/appointment-history"
-                            className="block px-4 py-2 text-sm hover:bg-emerald-50"
+                            className="block px-4 py-2 text-sm hover:bg-emerald-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
                           >
                             My Appointments
                           </Link>
@@ -401,13 +460,13 @@ const Navbar = () => {
                       )}
                       <Link
                         to="/settings"
-                        className="block px-4 py-2 text-sm hover:bg-emerald-50"
+                        className="block px-4 py-2 text-sm hover:bg-emerald-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
                       >
                         Settings
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
                       >
                         Logout
                       </button>
@@ -420,7 +479,7 @@ const Navbar = () => {
             {/* MOBILE */}
             <button
               onClick={() => setOpen((o) => !o)}
-              className="md:hidden p-2 rounded-lg hover:bg-emerald-50"
+              className="md:hidden p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
             >
               ☰
             </button>
@@ -430,14 +489,14 @@ const Navbar = () => {
 
       {/* MOBILE MENU */}
       {open && (
-        <div className="md:hidden bg-white border-t border-emerald-100">
+        <div className="md:hidden bg-white dark:bg-slate-900 border-t border-emerald-100 dark:border-slate-800">
           <div className="px-4 py-4 space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 onClick={(e) => handleNavClick(e, link.to)}
-                className="block px-4 py-3 rounded-lg hover:bg-emerald-50"
+                className="block px-4 py-3 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
               >
                 {link.name}
               </Link>
