@@ -2,23 +2,23 @@ import express from "express";
 import Doctor from "../models/Doctor.js";
 import User from "../models/User.js";
 import verifyToken from "../middleware/verifyToken.js";
+import mongoose from "mongoose";
+import AppError from "../utils/AppError.js";
 
 const router = express.Router();
 
 /**
  * POST: Register Doctor
  */
-router.post("/submit", verifyToken, async (req, res) => {
+router.post("/submit", verifyToken, async (req, res, next) => {
   try {
     // CHANGE THIS LINE:
-    const uid = req.firebaseUser.uid; 
+    const uid = req.firebaseUser.uid;
 
     // prevent duplicate doctor
     const existingDoctor = await Doctor.findOne({ uid }).lean();
     if (existingDoctor) {
-      return res.status(400).json({
-        message: "Doctor already registered",
-      });
+      return next(new AppError(400, "Doctor already registered"));
     }
 
     const doctor = new Doctor({
@@ -34,13 +34,12 @@ router.post("/submit", verifyToken, async (req, res) => {
       doctor,
     });
   } catch (error) {
-    console.error("Doctor submit error:", error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 });
 
 // Public: list registered doctors (for search)
-router.get("/public", async (_req, res) => {
+router.get("/public", async (_req, res, next) => {
   try {
     const doctors = await Doctor.find({ profileCompleted: true }).lean();
     const mapped = doctors.map((d) => ({
@@ -59,23 +58,28 @@ router.get("/public", async (_req, res) => {
     }));
     res.json({ doctors: mapped });
   } catch (error) {
-    console.error("Doctor public list error:", error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 });
 
 // Patient selects/consults a doctor
-router.post("/select/:doctorId", verifyToken, async (req, res) => {
+router.post("/select/:doctorId", verifyToken, async (req, res, next) => {
   try {
     const uid = req.firebaseUser.uid;
     const patient = await User.findOne({ uid }).lean();
     if (!patient || patient.role !== "patient") {
-      return res.status(403).json({ message: "Only patients can select a doctor" });
+      return next(
+        new AppError(403, "Only patients can select a doctor")
+      );
     }
-
+    if (!mongoose.Types.ObjectId.isValid(req.params.doctorId)) {
+      return next(new AppError(400, "Invalid doctor ID"));
+    }
     const doctor = await Doctor.findById(req.params.doctorId);
     if (!doctor) {
-      return res.status(404).json({ message: "Doctor not found" });
+      return next(
+        new AppError(404, "Doctor not found")
+      );;
     }
 
     const already = (doctor.interestedPatients || []).some((p) => p.uid === uid);
@@ -89,15 +93,14 @@ router.post("/select/:doctorId", verifyToken, async (req, res) => {
 
     res.json({ message: "Doctor selected", doctorId: doctor._id });
   } catch (error) {
-    console.error("Doctor select error:", error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 });
 
 /**
  * GET: Fetch Doctor Profile
  */
-router.get("/profile", verifyToken, async (req, res) => {
+router.get("/profile", verifyToken, async (req, res, next) => {
   try {
     const uid = req.firebaseUser.uid;
     console.log("🔍 /api/doctor/profile called for uid:", uid);
@@ -106,9 +109,7 @@ router.get("/profile", verifyToken, async (req, res) => {
 
     if (!doctor) {
       console.log("❌ Doctor profile not found for uid:", uid);
-      return res.status(404).json({
-        message: "Doctor profile not found",
-      });
+      return next(new AppError(404, "Doctor profile not found"));
     }
 
     console.log("✅ Doctor profile found:", doctor.fullName, "interestedPatients count:", doctor.interestedPatients?.length);
@@ -119,8 +120,7 @@ router.get("/profile", verifyToken, async (req, res) => {
       doctor,
     });
   } catch (error) {
-    console.error("Doctor profile fetch error:", error);
-    res.status(500).json({ message: "Server error" });
+    next(error);
   }
 });
 

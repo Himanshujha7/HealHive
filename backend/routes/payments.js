@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import { verifyFirebaseToken } from "../middleware/auth.js";
 import Stripe from "stripe";
 import Doctor from "../models/Doctor.js";
+import AppError from "../utils/AppError.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -11,11 +13,13 @@ const stripeSecret = process.env.STRIPE_SECRET_KEY;
 const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 
 // Dummy payment initiation: returns a consultationId for chat (kept for local testing)
-router.post("/initiate", verifyFirebaseToken, async (req, res) => {
+router.post("/initiate", verifyFirebaseToken, async (req, res, next) => {
   try {
     const { doctorId, doctorName, slotTime, fee } = req.body || {};
     if (!doctorId || !slotTime) {
-      return res.status(400).json({ error: "doctorId and slotTime are required" });
+      return next(
+        new AppError(400, "doctorId and slotTime are required")
+      );
     }
 
     // Generate a consultation session id
@@ -25,6 +29,9 @@ router.post("/initiate", verifyFirebaseToken, async (req, res) => {
     // Here, we simply return success for dummy payment
     // Attempt to record the interest on registered doctors
     try {
+      if (!mongoose.Types.ObjectId.isValid(doctorId)) {
+        return next(new AppError(400, "Invalid doctor ID"));
+      }
       const doctor = await Doctor.findById(doctorId);
       if (doctor) {
         const exists = (doctor.interestedPatients || []).some(p => p.uid === req.user?.uid);
@@ -59,24 +66,28 @@ router.post("/initiate", verifyFirebaseToken, async (req, res) => {
       fee,
     });
   } catch (err) {
-    console.error("Payment error:", err);
-    return res.status(500).json({ error: "Payment initiation failed" });
+    next(err);
   }
 });
 
 // Create Stripe PaymentIntent (inline, no redirect)
-router.post("/create-intent", verifyFirebaseToken, async (req, res) => {
+router.post("/create-intent", verifyFirebaseToken, async (req, res, next) => {
   try {
     if (!stripe) {
-      return res.status(500).json({ error: "Stripe not configured on server" });
+      return next(
+        new AppError(500, "Stripe not configured on server")
+      );
     }
 
     const { doctorId, doctorName, slotTime, amount, currency = "inr" } = req.body || {};
     console.log("💳 create-intent called:", { doctorId, doctorName, slotTime, amount, patientUid: req.user?.uid });
-    
-    if (!doctorId || !slotTime || !amount) {
-      return res.status(400).json({ error: "doctorId, slotTime, and amount are required" });
-    }
+
+    return next(
+      new AppError(
+        400,
+        "doctorId, slotTime and amount are required"
+      )
+    );
 
     // Amount should be in smallest currency unit
 
@@ -134,25 +145,36 @@ router.post("/create-intent", verifyFirebaseToken, async (req, res) => {
       consultationId,
     });
   } catch (err) {
-    console.error("Stripe create-intent error:", err);
-    return res.status(500).json({ error: "Failed to create payment intent" });
+    next(err);
   }
 });
 
 // Confirm payment: mark doctor record as paid
-router.post("/confirm", verifyFirebaseToken, async (req, res) => {
+router.post("/confirm", verifyFirebaseToken, async (req, res, next) => {
   try {
     const { doctorId, consultationId } = req.body || {};
     console.log("✅ confirm endpoint called:", { doctorId, consultationId, patientUid: req.user?.uid });
-    
+
     if (!doctorId || !consultationId) {
-      return res.status(400).json({ error: "doctorId and consultationId are required" });
+      return next(
+        new AppError(
+          400,
+          "doctorId and consultationId are required"
+        )
+      );
     }
 
+    if (!mongoose.Types.ObjectId.isValid(doctorId)) {
+      return next(
+        new AppError(400, "Invalid doctor ID")
+      );
+    }
     const doctor = await Doctor.findById(doctorId);
     if (!doctor) {
       console.log("❌ Doctor not found for ID:", doctorId);
-      return res.status(404).json({ error: "Doctor not found" });
+      return next(
+        new AppError(404, "Doctor not found")
+      );
     }
 
     console.log("✅ Doctor found:", doctor.fullName, "interestedPatients count:", doctor.interestedPatients?.length);
@@ -162,7 +184,12 @@ router.post("/confirm", verifyFirebaseToken, async (req, res) => {
     );
     if (!entry) {
       console.log("❌ Consultation entry not found for patient:", req.user?.uid, "consultationId:", consultationId);
-      return res.status(404).json({ error: "Consultation entry not found" });
+      return next(
+        new AppError(
+          404,
+          "Consultation entry not found"
+        )
+      );
     }
 
     console.log("📝 Setting paid=true and paidAt for patient:", entry.name);
@@ -172,16 +199,22 @@ router.post("/confirm", verifyFirebaseToken, async (req, res) => {
     console.log("✅ Payment confirmed and doctor record updated");
     return res.status(200).json({ success: true });
   } catch (err) {
-    console.error("Payment confirm error:", err);
-    return res.status(500).json({ error: "Failed to confirm payment" });
+    next(err);
   }
 });
 
 // Check consultation status (active within 24 hours)
-router.get("/status/:consultationId", verifyFirebaseToken, async (req, res) => {
+router.get("/status/:consultationId", verifyFirebaseToken, async (req, res, next) => {
   try {
     const { consultationId } = req.params;
-    if (!consultationId) return res.status(400).json({ error: "consultationId required" });
+    if (!consultationId?.trim()) {
+      return next(
+        new AppError(
+          400,
+          "consultationId is required"
+        )
+      );
+    }
 
     // Find doctor with this consultation
     const doctor = await Doctor.findOne({
@@ -219,8 +252,7 @@ router.get("/status/:consultationId", verifyFirebaseToken, async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Status check error:", err);
-    return res.status(500).json({ error: "Failed to check consultation status" });
+    next(err);
   }
 });
 

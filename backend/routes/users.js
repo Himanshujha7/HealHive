@@ -1,17 +1,20 @@
 import express from "express";
 import User from "../models/User.js";
 import { admin } from "../firebaseAdmin.js";
+import AppError from "../utils/AppError.js";
 
 const router = express.Router();
 
 // Sync user from Firebase to MongoDB
-router.post("/sync", async (req, res) => {
+router.post("/sync", async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).send("No token provided");
+    if (!authHeader) {
+      return next(new AppError(401, "No token provided"));
+    }
 
     const token = authHeader.split(" ")[1];
-const decodedToken = await admin.auth.verifyIdToken(token);
+    const decodedToken = await admin.auth.verifyIdToken(token);
     const { role, extra } = req.body;
 
     // 🔑 Check if user already exists
@@ -20,7 +23,12 @@ const decodedToken = await admin.auth.verifyIdToken(token);
     // 🆕 First-time user → role REQUIRED
     if (!user) {
       if (!role || !["patient", "doctor"].includes(role)) {
-        return res.status(400).json({ error: "Role required for new users" });
+        return next(
+          new AppError(
+            400,
+            "Role must be either 'patient' or 'doctor'"
+          )
+        );
       }
 
       // Inside router.post("/sync", ...)
@@ -44,16 +52,15 @@ const decodedToken = await admin.auth.verifyIdToken(token);
 
     res.json(user);
   } catch (err) {
-    console.error("Sync route error:", err);
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 
 // Get logged-in user role (for login redirect)
-router.post("/login", async (req, res) => {
+router.post("/login", async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).send("No token provided");
+    if (!authHeader) return next(new AppError(401, "No token provided"));
 
     const token = authHeader.split(" ")[1];
     const decodedToken = await admin.auth.verifyIdToken(token);
@@ -61,7 +68,9 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ uid: decodedToken.uid }).lean();
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return next(
+        new AppError(404, "User not found")
+      );
     }
 
     // If doctor, check doctor profile completion
@@ -80,8 +89,7 @@ router.post("/login", async (req, res) => {
       profileCompleted: user.profileCompleted,
     });
   } catch (err) {
-    console.error("Login route error:", err);
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 });
 

@@ -2,10 +2,11 @@ import express from "express";
 import Patient from "../models/Patient.js";
 import User from "../models/User.js";
 import { verifyFirebaseToken } from "../middleware/auth.js";
+import AppError from "../utils/AppError.js";
 
 const router = express.Router();
 
-router.post("/submit", verifyFirebaseToken, async (req, res) => {
+router.post("/submit", verifyFirebaseToken, async (req, res, next) => {
   try {
     const uid = req.user.uid;
 
@@ -18,7 +19,7 @@ router.post("/submit", verifyFirebaseToken, async (req, res) => {
 
     // 2. Update the User's profileCompleted status
     await User.findOneAndUpdate(
-      { uid }, 
+      { uid },
       { profileCompleted: true }
     );
 
@@ -28,13 +29,12 @@ router.post("/submit", verifyFirebaseToken, async (req, res) => {
       patient,
     });
   } catch (err) {
-    console.error("FULL ERROR:", err);
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 });
 
 // ✅ GET patient data
-router.get("/get", verifyFirebaseToken, async (req, res) => {
+router.get("/get", verifyFirebaseToken, async (req, res, next) => {
   try {
     const uid = req.user.uid;
     const patient = await Patient.findOne({ uid }).lean();
@@ -65,13 +65,12 @@ router.get("/get", verifyFirebaseToken, async (req, res) => {
 
     res.status(200).json(patient);
   } catch (err) {
-    console.error("Error fetching patient data:", err);
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 });
 
 // ✅ UPDATE patient data
-router.put("/update", verifyFirebaseToken, async (req, res) => {
+router.put("/update", verifyFirebaseToken, async (req, res, next) => {
   try {
     const uid = req.user.uid;
     const patient = await Patient.findOneAndUpdate(
@@ -86,8 +85,7 @@ router.put("/update", verifyFirebaseToken, async (req, res) => {
       patient,
     });
   } catch (err) {
-    console.error("Error updating patient data:", err);
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 });
 
