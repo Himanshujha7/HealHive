@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { auth } from "../firebase";
+import { Eye, EyeOff } from "lucide-react";
 import {
   createUserWithEmailAndPassword,
   updateProfile,
@@ -42,6 +43,7 @@ export default function CreateAccount() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("patient");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -157,9 +159,27 @@ export default function CreateAccount() {
 
             {/* Password */}
             <div>
-              <label className="text-sm font-medium text-gray-700">Password</label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1" />
-            </div>
+  <label className="text-sm font-medium text-gray-700">Password</label>
+
+  <div className="relative mt-1">
+    <Input
+      type={showPassword ? "text" : "password"}
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+      className="pr-12"
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-emerald-600"
+      aria-label={showPassword ? "Hide password" : "Show password"}
+    >
+      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+    </button>
+  </div>
+</div>
 
             <Button type="submit" disabled={loading} className="w-full mt-2">
               {loading ? "Creating Account..." : "Sign Up"}

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../Homepage/Navbar";
 import Footer from "../Homepage/footer";
 import { useAuth } from "../Context/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
 
 // ✅ Custom Input
 function Input({ type = "text", placeholder, className = "", ...props }) {
@@ -38,6 +39,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false); // ✅ NEW
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const { user, loading: authLoading } = useAuth();
 
   // Redirect already-authenticated users straight to home
@@ -156,18 +158,30 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <Input
-                type="password"
-                placeholder="Enter your password"
-                className="mt-1"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+  <label className="block text-sm font-medium text-gray-700">
+    Password
+  </label>
+
+  <div className="relative mt-1">
+    <Input
+      type={showPassword ? "text" : "password"}
+      placeholder="Enter your password"
+      className="pr-12"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-emerald-600"
+      aria-label={showPassword ? "Hide password" : "Show password"}
+    >
+      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+    </button>
+  </div>
+</div>
 
             <div className="text-right mt-2">
               <a
