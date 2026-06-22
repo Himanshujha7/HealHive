@@ -11,23 +11,49 @@ import {
 
 const specialties = [
   { name: "Cardiology", icon: Heart, desc: "Heart and vascular system care." },
-  { name: "Neurology", icon: Brain, desc: "Brain and nervous system specialists." },
-  { name: "Orthopedics", icon: Bone, desc: "Bones, joints, and musculoskeletal care." },
-  { name: "Ophthalmology", icon: Eye, desc: "Eye exams, surgery, and vision care." },
-  { name: "General Medicine", icon: Thermometer, desc: "Routine check-ups & preventive care." },
-  { name: "Gynecology", icon: Venus, desc: "Women’s health and reproductive care." },
-  { name: "Pediatrics", icon: Baby, desc: "Medical care for infants and children." },
-  { name: "Infectious Diseases", icon: Biohazard, desc: "Management of infections & epidemics." },
+  {
+    name: "Neurology",
+    icon: Brain,
+    desc: "Brain and nervous system specialists.",
+  },
+  {
+    name: "Orthopedics",
+    icon: Bone,
+    desc: "Bones, joints, and musculoskeletal care.",
+  },
+  {
+    name: "Ophthalmology",
+    icon: Eye,
+    desc: "Eye exams, surgery, and vision care.",
+  },
+  {
+    name: "General Medicine",
+    icon: Thermometer,
+    desc: "Routine check-ups & preventive care.",
+  },
+  {
+    name: "Gynecology",
+    icon: Venus,
+    desc: "Women’s health and reproductive care.",
+  },
+  {
+    name: "Pediatrics",
+    icon: Baby,
+    desc: "Medical care for infants and children.",
+  },
+  {
+    name: "Infectious Diseases",
+    icon: Biohazard,
+    desc: "Management of infections & epidemics.",
+  },
 ];
 
 const Specialties = () => {
   return (
-
-    <section id="specialities" className="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-24 overflow-hidden">
-
-    <section id="specialties" className="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 py-24 overflow-hidden">
-
-      
+    <section
+      id="specialties"
+      className="relative bg-linear-to-br from-emerald-50 via-white to-teal-50 py-24 overflow-hidden"
+    >
       {/* Background glow */}
       <div className="absolute -top-32 left-1/4 h-96 w-96 bg-emerald-200/40 rounded-full blur-3xl animate-pulse" />
 
@@ -41,7 +67,8 @@ const Specialties = () => {
             Medical Specialties We Cover
           </h2>
           <p className="mt-4 text-lg text-slate-600">
-            Connect with experienced specialists across a wide range of fields, from general medicine to advanced care.
+            Connect with experienced specialists across a wide range of fields,
+            from general medicine to advanced care.
           </p>
         </div>
 
@@ -58,13 +85,15 @@ const Specialties = () => {
                 {/* Icon with background shape */}
                 <div className="relative mb-4">
                   <div className="absolute -inset-2 rounded-full bg-emerald-100 opacity-30 blur-xl"></div>
-                  <div className="relative flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white transition-transform group hover:scale-110 mx-auto">
+                  <div className="relative flex items-center justify-center h-16 w-16 rounded-full bg-linear-to-br from-emerald-500 to-teal-500 text-white transition-transform group hover:scale-110 mx-auto">
                     <Icon className="h-8 w-8 group-hover:animate-pulse" />
                   </div>
                 </div>
 
                 {/* Specialty Name */}
-                <h3 className="text-lg font-semibold text-slate-900">{spec.name}</h3>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {spec.name}
+                </h3>
 
                 {/* Description */}
                 <p className="mt-2 text-slate-600 text-sm">{spec.desc}</p>
