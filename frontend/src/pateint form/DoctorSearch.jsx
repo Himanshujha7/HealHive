@@ -18,6 +18,9 @@ import {
   fetchRegisteredDoctors,
   getStableRating,
   getStableReviews,
+  getStableIsOnline,
+  getStableNextAvailable,
+  getStableLocation,
 } from "../utils/doctorFilterService";
 
 const DoctorSearch = () => {
@@ -67,11 +70,11 @@ const DoctorSearch = () => {
         ...doc,
         rating: doc.rating || getStableRating(doc),
         reviews: doc.reviews || getStableReviews(doc),
-        isOnline: typeof doc.isOnline === "boolean" ? doc.isOnline : Math.random() > 0.4,
+        isOnline: typeof doc.isOnline === "boolean" ? doc.isOnline : getStableIsOnline(doc),
         nextAvailable:
-          doc.nextAvailable || "Today at " + (Math.floor(Math.random() * 8) + 9) + ":00 AM",
+          doc.nextAvailable || getStableNextAvailable(doc),
         location:
-          doc.location || ["New Delhi", "Mumbai", "Bangalore", "Hyderabad"][Math.floor(Math.random() * 4)],
+          doc.location || getStableLocation(doc),
       })),
     [doctors]
   );
