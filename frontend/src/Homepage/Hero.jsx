@@ -57,7 +57,7 @@ const Hero = () => {
           {/* CTAs */}
           <div className="flex flex-wrap gap-4">
             <Link
-              to="/patient-form"
+              to="/doctor-profile"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 px-6 py-3 text-white font-semibold shadow-lg hover:scale-105 transition"
             >
               <Video className="h-5 w-5" />
