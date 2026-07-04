@@ -342,7 +342,7 @@ const Navbar = () => {
               </button>
             ) : (
               <Link
-                to="/patient-form"
+                to="/doctor-profile"
                 onClick={closeMobileMenu}
                 className="hidden md:inline-flex bg-gradient-to-r from-emerald-600 via-teal-600 to-green-600 text-white px-5 py-2 rounded-xl text-sm font-semibold shadow hover:scale-[1.02] transition"
               >
