@@ -63,12 +63,13 @@ const Specialties = () => {
           <span className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-1 rounded-full text-sm font-semibold">
             Our Expertise
           </span>
-          <h2 className="mt-6 text-3xl md:text-4xl font-extrabold text-slate-900">
+          <h2 className="mt-6 text-4xl md:text-5xl font-extrabold tracking-tight text-slate-950 leading-tight">
             Medical Specialties We Cover
           </h2>
-          <p className="mt-4 text-lg text-slate-600">
-            Connect with experienced specialists across a wide range of fields,
-            from general medicine to advanced care.
+
+          <p className="mt-5 text-lg md:text-xl leading-8 text-slate-700 max-w-2xl mx-auto">
+            Connect with experienced specialists across a wide range of fields, from
+            general medicine to advanced care.
           </p>
         </div>
 
