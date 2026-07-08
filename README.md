@@ -10,8 +10,10 @@ HealHive is a secure, real-time telehealth platform built with React, Firebase A
 - [Repository Structure](#repository-structure)
 - [Setup and Installation](#setup-and-installation)
 - [Environment Variables](#environment-variables)
+- [Firebase Setup](#firebase-setup)
 - [Running the App](#running-the-app)
 - [API Endpoints](#api-endpoints)
+- [Troubleshooting](#troubleshooting)
 - [Development Notes](#development-notes)
 - [Future Improvements](#future-improvements)
 
@@ -65,7 +67,7 @@ HealHive provides an end-to-end telehealth experience for patients and doctors. 
 - `backend/`
   - `server.js` - Express server setup, MongoDB connection, Socket.IO configuration
   - `routes/` - API routes for users, doctors, patients, and payments
-  - `models/` - Mongoose models forDoctor, Patient, and User
+  - `models/` - Mongoose models for Doctor, Patient, and User
   - `middleware/` - Firebase token verification middleware
   - `firebaseAdmin.js` - Firebase Admin initialization from env or local service account
 
@@ -76,7 +78,7 @@ HealHive provides an end-to-end telehealth experience for patients and doctors. 
   - `src/Context/AuthContext.jsx` - auth context provider
   - `src/chat/` - chat and call room components
   - `src/Doctor-Ui/` - doctor dashboard and form pages
-  - `src/pateint form/` - patient registration, profile, and payment screens
+  - `src/patient form/` - patient registration, profile, and payment screens
   - `firebase.json` - Firebase hosting configuration for frontend
 
 ## Setup and Installation
@@ -99,40 +101,73 @@ npm install
 cd ../frontend
 npm install
 ```
+The repository includes `frontend/.env.example` and `backend/.env.example` as templates. Copy them to `.env` before running the application.
+
 
 ## Environment Variables
 
 ### Backend
 
-Create a `.env` file inside `backend/` with the following variables:
+Copy the example environment file and update it with your own values.
 
-```env
-MONGO_URI=your_mongodb_connection_string
-STRIPE_SECRET_KEY=your_stripe_secret_key
-PORT=5000
-FIREBASE_SERVICE_ACCOUNT_JSON={...}
+**Linux / macOS**
+
+```bash
+cd backend
+cp .env.example .env
 ```
 
-- `MONGO_URI` - MongoDB connection URL
-- `STRIPE_SECRET_KEY` - Stripe secret key for payment intent generation
-- `PORT` - backend port (default: 5000)
-- `FIREBASE_SERVICE_ACCOUNT_JSON` - JSON string for Firebase Admin service account credentials
+**Windows (PowerShell)**
 
-If you do not provide `FIREBASE_SERVICE_ACCOUNT_JSON`, place `serviceAccountKey.json` inside `backend/`.
+```powershell
+Copy-Item .env.example .env
+```
 
 ### Frontend
 
-Create a `.env` file inside `frontend/` with your Firebase config values:
+Copy the example environment file and update it with your own values.
 
-```env
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+**Linux / macOS**
+
+```bash
+cd frontend
+cp .env.example .env
 ```
+
+**Windows (PowerShell)**
+
+```powershell
+Copy-Item .env.example .env
+```
+
+After copying the files:
+
+- Update the backend `.env` with your MongoDB URI, Stripe secret key, and Firebase Admin credentials.
+- Update the frontend `.env` with your Firebase Web SDK configuration, backend URL, and other required values.
+
+
+## Firebase Setup
+
+### Frontend (Firebase Web SDK)
+
+1. Go to the Firebase Console.
+2. Open your Firebase project.
+3. Navigate to **Project Settings → General**.
+4. Under **Your Apps**, copy the Firebase Web App configuration.
+5. Update the values in `frontend/.env`.
+
+### Backend (Firebase Admin SDK)
+
+Generate a Firebase Admin SDK service account key.
+
+You can configure it in either of the following ways:
+
+- Set `FIREBASE_SERVICE_ACCOUNT_JSON` in `backend/.env`.
+
+or
+
+- Place `serviceAccountKey.json` inside the `backend/` directory.
+
 
 ## Running the App
 
@@ -178,6 +213,47 @@ Open your browser at the URL shown by Vite (usually `http://localhost:5173`).
 - `POST /api/payments/create-intent` - Create Stripe payment intent
 - `POST /api/payments/confirm` - Confirm payment and mark consultation as paid
 - `GET /api/payments/status/:consultationId` - Check active consultation/payment status
+
+
+## Troubleshooting
+
+### FirebaseError: auth/invalid-api-key
+
+**Cause**
+
+The frontend Firebase configuration is missing or invalid.
+
+**Solution**
+
+Verify that all required `VITE_FIREBASE_*` variables are correctly configured in `frontend/.env`.
+
+---
+
+### Could not load Firebase credentials
+
+**Cause**
+
+The backend Firebase Admin SDK credentials are not configured.
+
+**Solution**
+
+Either:
+
+- Set `FIREBASE_SERVICE_ACCOUNT_JSON` in `backend/.env`, or
+- Place `serviceAccountKey.json` inside the `backend/` directory.
+
+---
+
+### MongoDB connection failed
+
+**Cause**
+
+The MongoDB connection string is missing or incorrect.
+
+**Solution**
+
+Verify that `MONGO_URI` is correctly configured and that your MongoDB instance is running.
+
 
 ## Development Notes
 
