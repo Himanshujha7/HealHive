@@ -65,11 +65,11 @@ export default function Login() {
       const user = userCredential.user;
 
       // ✅ Check email verification
-      if (!user.emailVerified) {
-        alert("Please verify your email before logging in.");
-        await auth.signOut();
-        return;
-      }
+      // if (!user.emailVerified) {
+      //   alert("Please verify your email before logging in.");
+      //   await auth.signOut();
+      //   return;
+      // }
 
       // ✅ Get Firebase token
       const token = await user.getIdToken();
