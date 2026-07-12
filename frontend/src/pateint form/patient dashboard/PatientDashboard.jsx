@@ -22,6 +22,8 @@ import {
   X,
   LayoutDashboard,
   HeartPulse,
+  AlertTriangle,
+  ClipboardList,
 } from "lucide-react";
 import Navbar from "../../Homepage/Navbar";
 import Footer from "../../Homepage/footer";
@@ -56,10 +58,10 @@ const samplePatient = {
 const Badge = ({ label, tone = "emerald" }) => {
   const toneClass =
     tone === "emerald"
-      ? "bg-emerald-100 text-emerald-700"
+      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
       : tone === "amber"
-      ? "bg-amber-100 text-amber-700"
-      : "bg-slate-100 text-slate-700";
+      ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
+      : "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200";
   return (
     <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${toneClass}`}>
       <ShieldCheck className="h-4 w-4" />
@@ -68,43 +70,86 @@ const Badge = ({ label, tone = "emerald" }) => {
   );
 };
 
-// Vertical navigation button used in the dashboard sidebar
-const NavItem = ({ icon: Icon, label, active, onClick }) => (
-  <button
-    onClick={onClick}
-    aria-current={active ? "page" : undefined}
-    className={`group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
-      active
-        ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-200/60"
-        : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
-    }`}
+// Reusable card surface — override-friendly (bg-white maps to slate-800 in dark)
+const Card = ({ id, className = "", children }) => (
+  <section
+    id={id}
+    className={`scroll-mt-24 bg-white border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm ${className}`}
   >
-    <Icon
-      className={`h-5 w-5 shrink-0 transition-colors ${
-        active ? "text-white" : "text-emerald-500 group-hover:text-emerald-600"
-      }`}
-    />
-    <span className="whitespace-nowrap">{label}</span>
-  </button>
+    {children}
+  </section>
 );
 
-const StatCard = ({ icon: Icon, label, value, helper }) => (
-  <div className="group bg-white border border-emerald-100 rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md">
-    <div className="flex items-center gap-3 mb-3">
-      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-        <Icon className="h-5 w-5" />
+// KPI stat tile — headline number/value with an icon
+const StatTile = ({ icon: Icon, label, value, sublabel, children }) => (
+  <div className="group bg-white border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <div className="flex items-center gap-3">
+      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
+        {Icon && <Icon className="h-5 w-5" />}
       </div>
-      <div>
+      <div className="min-w-0 flex-1">
         <p className="text-xs text-slate-500">{label}</p>
-        <p className="text-lg font-semibold text-slate-900">{value}</p>
+        {children ? (
+          children
+        ) : (
+          <p className="text-lg font-semibold text-slate-900 truncate">{value ?? "—"}</p>
+        )}
       </div>
     </div>
-    {helper && <p className="text-xs text-slate-500">{helper}</p>}
+    {sublabel && <p className="mt-3 text-xs text-slate-500">{sublabel}</p>}
   </div>
 );
 
+// Compact count tile for the "health at a glance" row
+const MiniStat = ({ icon: Icon, count, label, tone = "emerald" }) => {
+  const toneClass =
+    tone === "amber"
+      ? "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300"
+      : "bg-emerald-50 text-emerald-600";
+  return (
+    <div className="bg-white border border-slate-200 dark:border-slate-700 rounded-2xl p-4 shadow-sm flex items-center gap-3">
+      <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${toneClass}`}>
+        {Icon && <Icon className="h-5 w-5" />}
+      </div>
+      <div>
+        <p className="text-2xl font-bold text-slate-900 leading-none">{count}</p>
+        <p className="text-xs text-slate-500 mt-1">{label}</p>
+      </div>
+    </div>
+  );
+};
+
+// Single-value completeness meter (SVG donut, brand hue)
+const CompletenessRing = ({ value }) => {
+  const r = 42;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference - (Math.min(100, Math.max(0, value)) / 100) * circumference;
+  return (
+    <div className="relative h-32 w-32">
+      <svg viewBox="0 0 100 100" className="h-32 w-32 -rotate-90">
+        <circle cx="50" cy="50" r={r} fill="none" strokeWidth="9" className="stroke-slate-200 dark:stroke-slate-700" />
+        <circle
+          cx="50"
+          cy="50"
+          r={r}
+          fill="none"
+          strokeWidth="9"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          className="stroke-emerald-500 transition-all duration-500"
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-2xl font-extrabold text-slate-900">{value}%</span>
+        <span className="text-[10px] uppercase tracking-wide text-slate-500">Complete</span>
+      </div>
+    </div>
+  );
+};
+
 const InfoRow = ({ label, value }) => (
-  <div className="flex justify-between gap-4 py-2.5 border-b border-slate-100 last:border-0 text-sm">
+  <div className="flex justify-between gap-4 py-2.5 border-b border-slate-100 dark:border-slate-700/60 last:border-0 text-sm">
     <span className="text-slate-500">{label}</span>
     <span className="font-medium text-slate-900 text-right break-words">{value || "—"}</span>
   </div>
@@ -113,7 +158,7 @@ const InfoRow = ({ label, value }) => (
 const SectionHeader = ({ icon: Icon, title, subtitle }) => (
   <div className="flex items-start gap-3 mb-6">
     <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-      <Icon className="h-5 w-5" />
+      {Icon && <Icon className="h-5 w-5" />}
     </div>
     <div>
       <h3 className="text-lg font-bold text-slate-900 leading-tight">{title}</h3>
@@ -122,13 +167,23 @@ const SectionHeader = ({ icon: Icon, title, subtitle }) => (
   </div>
 );
 
+// Anchor pill for the sticky in-page quick nav
+const QuickLink = ({ href, icon: Icon, label }) => (
+  <a
+    href={href}
+    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap bg-white border border-slate-200 dark:border-slate-700 text-slate-600 hover:text-emerald-700 hover:border-emerald-300 dark:hover:text-emerald-300 transition-colors"
+  >
+    {Icon && <Icon className="h-4 w-4 text-emerald-500" />}
+    {label}
+  </a>
+);
+
 const PatientDashboard = ({ patient = samplePatient }) => {
   const { user, loading: authLoading } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [patientData, setPatientData] = useState(patient);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeSection, setActiveSection] = useState("overview");
 
   // ✅ Fetch patient data on mount
   useEffect(() => {
@@ -359,16 +414,39 @@ const PatientDashboard = ({ patient = samplePatient }) => {
     );
   }
 
-  const navItems = [
-    { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "personal", label: "Personal Info", icon: UserCircle },
-    { id: "health", label: "Symptoms & Meds", icon: HeartPulse },
-    { id: "care", label: "Care Team", icon: BadgeCheck },
-    { id: "reports", label: "Test Reports", icon: File },
-    { id: "history", label: "Medical History", icon: Clock },
-  ];
+  // Derived, user-centric metrics for the at-a-glance visualizations
+  const symptomsCount = (data.symptoms || []).length;
+  const medsCount = (data.currentMedications || []).length;
+  const allergiesCount = (data.allergies || []).length;
+  const reportsCount = (data.medicalDocuments || []).length;
 
-  const activeLabel = navItems.find((n) => n.id === activeSection)?.label || "";
+  // Profile completeness — share of key fields the patient has filled in
+  const completenessFields = [
+    data.name,
+    data.age,
+    data.gender,
+    data.bloodGroup,
+    data.email,
+    data.phone,
+    data.location || data.city || data.address,
+    data.primaryCondition,
+    data.specialty,
+    symptomsCount > 0,
+    medsCount > 0,
+    data.emergencyContact,
+  ];
+  const completeness = Math.round(
+    (completenessFields.filter(Boolean).length / completenessFields.length) * 100
+  );
+
+  const quickLinks = [
+    { href: "#overview", label: "Overview", icon: LayoutDashboard },
+    { href: "#personal", label: "Personal Info", icon: UserCircle },
+    { href: "#health", label: "Symptoms & Meds", icon: HeartPulse },
+    { href: "#care", label: "Care Team", icon: BadgeCheck },
+    { href: "#reports", label: "Test Reports", icon: File },
+    { href: "#history", label: "Medical History", icon: Clock },
+  ];
 
   return (
     <>
@@ -432,142 +510,106 @@ const PatientDashboard = ({ patient = samplePatient }) => {
             </div>
           </div>
 
-          {/* Layout: vertical nav + content */}
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Sidebar navigation */}
-            <aside className="lg:w-60 lg:shrink-0">
-              <nav className="lg:sticky lg:top-6 bg-white/80 backdrop-blur border border-emerald-100 rounded-2xl p-3 shadow-sm">
-                <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible">
-                  {navItems.map((item) => (
-                    <NavItem
-                      key={item.id}
-                      icon={item.icon}
-                      label={item.label}
-                      active={activeSection === item.id}
-                      onClick={() => setActiveSection(item.id)}
-                    />
-                  ))}
-                </div>
-              </nav>
-            </aside>
+          {/* Allergy safety alert — status color WITH icon + label, never color alone */}
+          {allergiesCount > 0 && (
+            <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-300 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 px-4 py-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <span className="font-semibold text-amber-800 dark:text-amber-200">
+                  Known allergies:
+                </span>{" "}
+                <span className="text-amber-700 dark:text-amber-300">
+                  {(data.allergies || []).join(", ")}
+                </span>
+              </div>
+            </div>
+          )}
 
-            {/* Content panel */}
-            <main className="flex-1 min-w-0">
-              {/* Overview */}
-              {activeSection === "overview" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Primary Condition */}
-                  <div className="group bg-white border border-emerald-100 rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                        <Activity className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs text-slate-500">Primary Condition</p>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={data.primaryCondition || ""}
-                            onChange={(e) => handleChange("primaryCondition", e.target.value)}
-                            className="text-lg font-semibold text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-full"
-                            placeholder="Enter condition"
-                          />
-                        ) : (
-                          <p className="text-lg font-semibold text-slate-900">{data.primaryCondition || "—"}</p>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500">Latest assessment</p>
-                  </div>
+          {/* Sticky in-page quick navigation */}
+          <div className="sticky top-2 z-10 -mx-1 mb-6">
+            <nav className="flex gap-2 overflow-x-auto rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur border border-slate-200 dark:border-slate-700 p-2 shadow-sm">
+              {quickLinks.map((link) => (
+                <QuickLink key={link.href} href={link.href} icon={link.icon} label={link.label} />
+              ))}
+            </nav>
+          </div>
 
-                  {/* Assigned Doctor */}
-                  <div className="group bg-white border border-emerald-100 rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                        <Heart className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs text-slate-500">Assigned Doctor</p>
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={data.doctor || ""}
-                            onChange={(e) => handleChange("doctor", e.target.value)}
-                            className="text-lg font-semibold text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-full"
-                            placeholder="Enter doctor name"
-                          />
-                        ) : (
-                          <p className="text-lg font-semibold text-slate-900">{data.doctor || "Not assigned"}</p>
-                        )}
-                      </div>
-                    </div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={data.specialty || ""}
-                        onChange={(e) => handleChange("specialty", e.target.value)}
-                        className="text-xs text-slate-500 border-b border-emerald-300 focus:border-emerald-500 outline-none w-full"
-                        placeholder="Enter specialty"
-                      />
-                    ) : (
-                      <p className="text-xs text-slate-500">{data.specialty ? `${data.specialty} Specialist` : ""}</p>
-                    )}
-                  </div>
+          {/* Single-page dashboard body */}
+          <div className="space-y-6">
+            {/* KPI row */}
+            <div id="overview" className="scroll-mt-24 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <StatTile icon={Activity} label="Primary Condition" sublabel="Latest assessment">
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={data.primaryCondition || ""}
+                    onChange={(e) => handleChange("primaryCondition", e.target.value)}
+                    className="text-lg font-semibold text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-full bg-transparent"
+                    placeholder="Enter condition"
+                  />
+                ) : (
+                  <p className="text-lg font-semibold text-slate-900 truncate">{data.primaryCondition || "—"}</p>
+                )}
+              </StatTile>
 
-                  {/* Last Visit */}
-                  <div className="group bg-white border border-emerald-100 rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                        <Calendar className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs text-slate-500">Last Visit</p>
-                        {isEditing ? (
-                          <input
-                            type="date"
-                            value={data.lastVisit || ""}
-                            onChange={(e) => handleChange("lastVisit", e.target.value)}
-                            className="text-lg font-semibold text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-full"
-                          />
-                        ) : (
-                          <p className="text-lg font-semibold text-slate-900">{data.lastVisit || "—"}</p>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500">Previous consultation date</p>
-                  </div>
+              <StatTile icon={Heart} label="Assigned Doctor" sublabel={data.specialty ? `${data.specialty} Specialist` : "Awaiting assignment"}>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={data.doctor || ""}
+                    onChange={(e) => handleChange("doctor", e.target.value)}
+                    className="text-lg font-semibold text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-full bg-transparent"
+                    placeholder="Enter doctor name"
+                  />
+                ) : (
+                  <p className="text-lg font-semibold text-slate-900 truncate">{data.doctor || "Not assigned"}</p>
+                )}
+              </StatTile>
 
-                  {/* Next Follow-up */}
-                  <div className="group bg-white border border-emerald-100 rounded-2xl p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-                        <Clock className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs text-slate-500">Next Follow-up</p>
-                        {isEditing ? (
-                          <input
-                            type="date"
-                            value={data.nextFollowUp || ""}
-                            onChange={(e) => handleChange("nextFollowUp", e.target.value)}
-                            className="text-lg font-semibold text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-full"
-                          />
-                        ) : (
-                          <p className="text-lg font-semibold text-slate-900">{data.nextFollowUp || "To be scheduled"}</p>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500">Suggested timeline</p>
-                  </div>
-                </div>
-              )}
+              <StatTile icon={Calendar} label="Last Visit" sublabel="Previous consultation">
+                {isEditing ? (
+                  <input
+                    type="date"
+                    value={data.lastVisit || ""}
+                    onChange={(e) => handleChange("lastVisit", e.target.value)}
+                    className="text-lg font-semibold text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-full bg-transparent"
+                  />
+                ) : (
+                  <p className="text-lg font-semibold text-slate-900 truncate">{data.lastVisit || "—"}</p>
+                )}
+              </StatTile>
 
-              {/* Personal Info */}
-              {activeSection === "personal" && (
-                <div className="bg-white border border-emerald-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+              <StatTile icon={Clock} label="Next Follow-up" sublabel="Suggested timeline">
+                {isEditing ? (
+                  <input
+                    type="date"
+                    value={data.nextFollowUp || ""}
+                    onChange={(e) => handleChange("nextFollowUp", e.target.value)}
+                    className="text-lg font-semibold text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-full bg-transparent"
+                  />
+                ) : (
+                  <p className="text-lg font-semibold text-slate-900 truncate">{data.nextFollowUp || "To be scheduled"}</p>
+                )}
+              </StatTile>
+            </div>
+
+            {/* Health at a glance — data-driven count tiles */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <MiniStat icon={ClipboardList} count={symptomsCount} label="Symptoms logged" />
+              <MiniStat icon={Pill} count={medsCount} label="Current medications" />
+              <MiniStat icon={AlertTriangle} count={allergiesCount} label="Known allergies" tone={allergiesCount > 0 ? "amber" : "emerald"} />
+              <MiniStat icon={File} count={reportsCount} label="Test reports" />
+            </div>
+
+            {/* Two-column content grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Main column */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Personal Info */}
+                <Card id="personal" className="p-6 sm:p-8">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center text-2xl font-bold">
-                      {data.name?.[0] || "P"}
+                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center text-2xl font-bold shrink-0">
+                      {data.name?.[0]?.toUpperCase() || "P"}
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm text-slate-500">Patient</p>
@@ -576,7 +618,7 @@ const PatientDashboard = ({ patient = samplePatient }) => {
                           type="text"
                           value={data.name}
                           onChange={(e) => handleChange("name", e.target.value)}
-                          className="text-xl font-bold text-slate-900 border-b-2 border-emerald-300 focus:border-emerald-500 outline-none w-full"
+                          className="text-xl font-bold text-slate-900 border-b-2 border-emerald-300 focus:border-emerald-500 outline-none w-full bg-transparent"
                         />
                       ) : (
                         <p className="text-xl font-bold text-slate-900 truncate">{data.name}</p>
@@ -588,33 +630,33 @@ const PatientDashboard = ({ patient = samplePatient }) => {
                   <div className="grid sm:grid-cols-2 gap-x-8">
                     {isEditing ? (
                       <>
-                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 text-sm">
+                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/60 text-sm">
                           <span className="text-slate-500">Age</span>
                           <input
                             type="number"
                             value={data.age}
                             onChange={(e) => handleChange("age", e.target.value)}
-                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-24 text-right"
+                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none w-24 text-right bg-transparent"
                           />
                         </div>
-                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 text-sm">
+                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/60 text-sm">
                           <span className="text-slate-500">Gender</span>
                           <select
                             value={data.gender}
                             onChange={(e) => handleChange("gender", e.target.value)}
-                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none"
+                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none bg-transparent"
                           >
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
                           </select>
                         </div>
-                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 text-sm">
+                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/60 text-sm">
                           <span className="text-slate-500">Blood Group</span>
                           <select
                             value={data.bloodGroup}
                             onChange={(e) => handleChange("bloodGroup", e.target.value)}
-                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none"
+                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none bg-transparent"
                           >
                             <option value="A+">A+</option>
                             <option value="A-">A-</option>
@@ -626,31 +668,31 @@ const PatientDashboard = ({ patient = samplePatient }) => {
                             <option value="O-">O-</option>
                           </select>
                         </div>
-                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 text-sm">
+                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/60 text-sm">
                           <span className="text-slate-500">Email</span>
                           <input
                             type="email"
                             value={data.email}
                             onChange={(e) => handleChange("email", e.target.value)}
-                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none flex-1 ml-4 text-right"
+                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none flex-1 ml-4 text-right bg-transparent"
                           />
                         </div>
-                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 text-sm">
+                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/60 text-sm">
                           <span className="text-slate-500">Phone</span>
                           <input
                             type="tel"
                             value={data.phone}
                             onChange={(e) => handleChange("phone", e.target.value)}
-                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none flex-1 ml-4 text-right"
+                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none flex-1 ml-4 text-right bg-transparent"
                           />
                         </div>
-                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 text-sm">
+                        <div className="flex justify-between items-center py-2.5 border-b border-slate-100 dark:border-slate-700/60 text-sm">
                           <span className="text-slate-500">Location</span>
                           <input
                             type="text"
                             value={data.location}
                             onChange={(e) => handleChange("location", e.target.value)}
-                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none flex-1 ml-4 text-right"
+                            className="font-medium text-slate-900 border-b border-emerald-300 focus:border-emerald-500 outline-none flex-1 ml-4 text-right bg-transparent"
                           />
                         </div>
                       </>
@@ -665,12 +707,10 @@ const PatientDashboard = ({ patient = samplePatient }) => {
                       </>
                     )}
                   </div>
-                </div>
-              )}
+                </Card>
 
-              {/* Symptoms & Meds */}
-              {activeSection === "health" && (
-                <div className="bg-white border border-emerald-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+                {/* Symptoms & Meds */}
+                <Card id="health" className="p-6 sm:p-8">
                   <SectionHeader icon={FileText} title="Symptoms & Notes" subtitle="Reported symptoms and active medications" />
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
@@ -684,7 +724,7 @@ const PatientDashboard = ({ patient = samplePatient }) => {
                             {sym}
                           </span>
                         ))}
-                        {(!data.symptoms || data.symptoms.length === 0) && (
+                        {symptomsCount === 0 && (
                           <span className="text-sm text-slate-500">No symptoms listed.</span>
                         )}
                       </div>
@@ -700,32 +740,16 @@ const PatientDashboard = ({ patient = samplePatient }) => {
                             <Pill className="h-4 w-4 text-emerald-500" /> {med}
                           </div>
                         ))}
-                        {(!data.currentMedications || data.currentMedications.length === 0) && (
+                        {medsCount === 0 && (
                           <span className="text-sm text-slate-500">No medications recorded.</span>
                         )}
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                </Card>
 
-              {/* Care Team */}
-              {activeSection === "care" && (
-                <div className="bg-white border border-emerald-100 rounded-3xl p-6 sm:p-8 shadow-sm max-w-xl">
-                  <SectionHeader icon={BadgeCheck} title="Care Team" subtitle="Your assigned care contacts" />
-                  <div className="space-y-1">
-                    <InfoRow label="Doctor" value={data.doctor || "Not assigned"} />
-                    <InfoRow label="Specialty" value={data.specialty || "—"} />
-                    <InfoRow label="Email" value={data.email || "—"} />
-                    <InfoRow label="Phone" value={data.phone || "—"} />
-                    <InfoRow label="Location" value={data.location || "—"} />
-                  </div>
-                </div>
-              )}
-
-              {/* Test Reports */}
-              {activeSection === "reports" && (
-                <div className="bg-white border border-emerald-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+                {/* Test Reports */}
+                <Card id="reports" className="p-6 sm:p-8">
                   <SectionHeader icon={File} title="Uploaded Test Reports" subtitle="Upload and review your medical documents" />
 
                   <MedicalReportUpload onUploadSuccess={handleReportUploaded} />
@@ -751,16 +775,14 @@ const PatientDashboard = ({ patient = samplePatient }) => {
                         className="text-emerald-600 text-xs font-semibold hover:underline">View</button>
                       </div>
                     ))}
-                    {(!data.medicalDocuments || data.medicalDocuments.length === 0) && (
+                    {reportsCount === 0 && (
                       <p className="text-sm text-slate-500">No reports uploaded.</p>
                     )}
                   </div>
-                </div>
-              )}
+                </Card>
 
-              {/* Medical History */}
-              {activeSection === "history" && (
-                <div className="bg-white border border-emerald-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+                {/* Medical History */}
+                <Card id="history" className="p-6 sm:p-8">
                   <SectionHeader icon={Clock} title="Medical History" subtitle="Timeline of past events and consultations" />
                   <div className="space-y-4">
                     {(data.medicalHistory || []).map((event, idx) => (
@@ -775,10 +797,55 @@ const PatientDashboard = ({ patient = samplePatient }) => {
                       <p className="text-sm text-slate-500">No history recorded yet.</p>
                     )}
                   </div>
-                </div>
-              )}
-            </main>
+                </Card>
+              </div>
+
+              {/* Side column */}
+              <div className="space-y-6">
+                {/* Profile completeness */}
+                <Card className="p-6 flex flex-col items-center text-center">
+                  <p className="text-sm font-semibold text-slate-900 self-start mb-4">Profile Completeness</p>
+                  <CompletenessRing value={completeness} />
+                  <p className="mt-4 text-xs text-slate-500">
+                    {completeness < 100
+                      ? "Complete your profile so doctors have the full picture."
+                      : "Your profile is fully complete. Nice work!"}
+                  </p>
+                </Card>
+
+                {/* Care Team */}
+                <Card id="care" className="p-6">
+                  <SectionHeader icon={BadgeCheck} title="Care Team" subtitle="Your assigned care contacts" />
+                  <div className="space-y-1">
+                    <InfoRow label="Doctor" value={data.doctor || "Not assigned"} />
+                    <InfoRow label="Specialty" value={data.specialty || "—"} />
+                    <InfoRow label="Email" value={data.email || "—"} />
+                    <InfoRow label="Phone" value={data.phone || "—"} />
+                    <InfoRow label="Location" value={data.location || "—"} />
+                  </div>
+                </Card>
+
+                {/* Allergies */}
+                <Card className="p-6">
+                  <SectionHeader icon={AlertTriangle} title="Allergies" subtitle="Important for safe prescriptions" />
+                  <div className="flex flex-wrap gap-2">
+                    {(data.allergies || []).map((item, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-sm border border-amber-200 dark:border-amber-500/30"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                    {allergiesCount === 0 && (
+                      <span className="text-sm text-slate-500">No known allergies.</span>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
       <Footer />
