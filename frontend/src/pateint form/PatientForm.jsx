@@ -5,7 +5,7 @@ import { filterDoctors } from "../utils/doctorFilterService.js";
 import Navbar from "../Homepage/Navbar";
 import Footer from "../Homepage/footer";
 import useFormValidation from '../hooks/useFormValidation';
-import FormInput from '../components/FormInput';
+import FormInput from '../chat/components/FormInput';
 import {
   User,
   Calendar,
